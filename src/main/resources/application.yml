@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sys?serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
+  jpa:
+    open-in-view: true
+    show-sql: true
+    generate-ddl: false
+    database: sql-server
+    database-platform: org.hibernate.dialect.MySQLInnoDBDialect
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        fomat_sql: true
+      show_sql: true

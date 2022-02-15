@@ -1,8 +1,11 @@
 package main.demo.mvc.service;
 
-import org.springframework.stereotype.Service;
 
-@Service
-public class Service_Login {
+import main.demo.domain.dto.response.Response_User;
+import main.demo.domain.dto.response.basement.ObjectMessage;
 
+
+public interface Service_Login {
+
+    public ObjectMessage<Response_User.User> getUser(String uuid);
 }
