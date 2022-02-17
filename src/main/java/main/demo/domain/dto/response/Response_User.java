@@ -2,6 +2,7 @@ package main.demo.domain.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import main.demo.domain.basement.embed.Password;
 
 import java.time.LocalDateTime;
 

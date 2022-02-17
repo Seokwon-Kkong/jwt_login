@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 public class Service_Impl_Login extends BaseService<Repository_User> implements Service_Login {
@@ -25,35 +26,67 @@ public class Service_Impl_Login extends BaseService<Repository_User> implements 
     }
 
     @Override
-    public ObjectMessage<Response_User.User> getUser(String uuid) {
+    public ObjectMessage<Response_User.User> getUser(String id) {
         return ObjectMessage.<Response_User.User>builder()
                 .status(HttpStatus.OK)
-                .data(repository.getUser(uuid))
-                .build();
-    }
-
-    @Override
-    public ObjectMessage<Response_User.User> checkUser(String id, String pwd) {
-        return ObjectMessage.<Response_User.User>builder()
-                .status(HttpStatus.OK)
-                .data(repository.checkUser(id,pwd))
+                .data(repository.getUser(id))
                 .build();
     }
 
     @Override
     @Transactional
-    public ObjectMessage<Response_User.User> addUser(Param_User.Add param) {
-        System.out.println(param);
+    public ObjectMessage<Response_User.User> addUser(Param_User.User param) {
         B_User user = B_User.builder()
-                .password(param.getUser_pwd())
-                .account_id(param.getUser_id())
-                .refresh_token(null)
-                .access_token(null)
+                .password(param.getPwd())
+                .account_id(param.getId())
                 .build();
 
         em.persist(user);
 
         return null;
     }
+
+    @Override
+    public ObjectMessage<Response_User.User> checkUser(String id, String pwd) {
+        boolean result = repository.checkUser(id,pwd);
+        if(result) {
+            return ObjectMessage.<Response_User.User>builder()
+                    .status(HttpStatus.OK)
+                    .data(repository.getUser(id))
+                    .build();
+        } else {
+            return ObjectMessage.<Response_User.User>builder()
+                    .status(HttpStatus.OK)
+                    .data(null)
+                    .build();
+        }
+    }
+
+    @Override
+    @Transactional
+    public ObjectMessage<Response_User.User> deleteUser(Param_User.User param) {
+        Optional<B_User> entity = repository.getUser(param.getId(), param.getPwd());
+        if (entity.isEmpty()) {
+            return ObjectMessage.<Response_User.User>builder()
+                .status(HttpStatus.OK)
+                .data(null)
+                .build();
+        }
+        em.remove(entity.get());
+        return ObjectMessage.<Response_User.User>builder()
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public ObjectMessage<Response_User.User> updateUser(Param_User.User param) {
+        boolean isMatched = repository.checkUser(param.getId(),param.getPwd());
+        if(isMatched) {
+            repository.updateUser(param.getId(), param.getNewPwd());
+        }
+        return null;
+    }
+
 
 }

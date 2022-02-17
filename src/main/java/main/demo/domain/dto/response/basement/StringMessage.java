@@ -1,19 +1,18 @@
 package main.demo.domain.dto.response.basement;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 @Getter@Setter
-public class ObjectMessage<T> extends BaseResponse {
+public class StringMessage extends BaseResponse{
 
-    private T data;
+    private String message;
 
     @Builder
-    public ObjectMessage(HttpStatus status, T data) {
+    public StringMessage(HttpStatus status,String message) {
         super(status);
-        this.data = data;
+        this.message = message;
     }
 }

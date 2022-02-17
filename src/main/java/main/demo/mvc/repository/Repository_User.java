@@ -1,6 +1,8 @@
 package main.demo.mvc.repository;
 
+import com.querydsl.jpa.impl.JPAUpdateClause;
 import main.demo.configuration.exception.FaultParamException;
+import main.demo.domain.basement.embed.Password;
 import main.demo.domain.dto.request.Param_User;
 import main.demo.domain.dto.response.Response_User;
 import main.demo.domain.entity.user.B_User;
@@ -8,14 +10,20 @@ import main.demo.domain.entity.user.QB_User;
 import main.demo.mvc.repository.basement.BaseRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Repository
 public class Repository_User extends BaseRepository {
 
     QB_User q_user = QB_User.b_User;
 
-    public Response_User.User getUser(String uuid) {
-        B_User user = query.selectFrom(q_user).where(q_user.account_id.eq(uuid)).fetchOne();
-        System.out.println(user.getCreated_at());
+    public Response_User.User getUser(String id) {
+        B_User user = query.selectFrom(q_user).where(q_user.account_id.eq(id)).fetchOne();
+        if(user == null) {
+            System.out.println("user 없음");
+            return null;
+        }
         return Response_User.User.builder()
                 .idx(user.getIdx())
                 .id(user.getAccount_id())
@@ -26,24 +34,27 @@ public class Repository_User extends BaseRepository {
                 .build();
     }
 
-    public Response_User.User checkUser(String id, String password) {
-        B_User user = query.selectFrom(q_user)
-                .where(q_user.account_id.eq(id).and(q_user.password.password.eq(password)))
-                .fetchOne();
-            if(user == null) {
-                System.out.println("user 없음");
-                return null;
-            }
-        return Response_User.User.builder()
-                .idx(user.getIdx())
-                .id(user.getAccount_id())
-                .pwd(user.getPassword().getPassword())
-                .refreshToken(user.getRefresh_token())
-                .created(user.getCreated_at())
-                .updated(user.getUpdate_at())
-                .build();
+    public boolean checkUser(String id, String pwd) {
+        B_User user = query.selectFrom(q_user).where(q_user.account_id.eq(id)).fetchOne();
+        Password pass = new Password(user.getPassword().getPassword(),user.getPassword().getSalt());
+        return pass.isMatched(pwd);
     }
 
+    public Optional<B_User> getUser(String id, String pwd) {
+        boolean isMatched = this.checkUser(id,pwd);
+        B_User entity = null;
+        if(isMatched) {
+            entity = query.selectFrom(q_user).where(q_user.account_id.eq(id)).fetchOne();
+        }
+        return entity != null ? Optional.of(entity) : Optional.empty();
+    }
+
+    public long updateUser(String id, String newPwd) {
+        JPAUpdateClause update = query.update(q_user).where(q_user.account_id.eq(id));
+        update.set(q_user.password, new Password(newPwd));
+        update.set(q_user.update_at, LocalDateTime.now());
+        return update.execute();
+    }
 }
 
 //    CREATE TABLE `test_user` (

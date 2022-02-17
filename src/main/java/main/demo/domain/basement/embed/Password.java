@@ -21,11 +21,16 @@ public class Password {
         this.password = encrypt(password,random);
     }
 
+    public Password(String password,String salt) {
+        this.salt = salt;
+        this.password = password;
+    }
+
     public boolean isMatched(String input) {
         return password.equals(encrypt(input, salt));
     }
 
-    private String encrypt(String password, String salt) {
+    public String encrypt(String password, String salt) {
         return Hashing.sha256().hashString(password + salt, StandardCharsets.UTF_8).toString();
     }
 }

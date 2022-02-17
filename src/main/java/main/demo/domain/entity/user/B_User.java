@@ -31,6 +31,7 @@ public class B_User extends BaseEntity {
     @Column(name = "user_account_token_refresh", columnDefinition = "LONGTEXT")
     private String refresh_token;
 
+
     @Builder
     public B_User(String account_id, String password, String access_token, String refresh_token) {
         this.account_id = account_id;
